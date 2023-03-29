@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "node-html-parser": "^6.1.5",
+    "playwright": "^1.32.1"
+  }
+}
