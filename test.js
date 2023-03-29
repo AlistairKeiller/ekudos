@@ -5,6 +5,8 @@ senderEmails = [];
 recipientNames = [];
 recipientEmails = [];
 
+counter = 0;
+
 for(let i = 1; i < 36; i++) {
     const d = HTMLParser.parse(fs.readFileSync(`recipient/p${i}.html`, 'utf8'));
     const names = d.querySelectorAll('.box-member__title');
@@ -28,7 +30,7 @@ for(let i = 1; i < 8; i++) {
 
 async function fillForm(proxyServer) {
     try {
-    const browser = await chromium.launch({headless: false, proxy: {server: proxyServer}});
+    const browser = await chromium.launch({proxy: {server: proxyServer}});
     const page = await browser.newPage();
     await page.goto('https://stanforduniversity.qualtrics.com/jfe/form/SV_cYfOYqREtprzaia');
     await page.getByText('Your Name').waitFor();
@@ -63,11 +65,9 @@ async function fillForm(proxyServer) {
     // await page.waitForTimeout(Math.random()*10000);
     // await page.getByLabel("Next").click();
     await page.waitForTimeout(Math.random()*10000);
-    await page.close();
+    console.log(++counter);
     await browser.close();
-    } catch (e) {
-        console.log(e);
-    }
+    } catch (e) {}
 }
 
 (async () => {
