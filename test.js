@@ -1,4 +1,4 @@
-const { chromium } = require('playwright'), fs = require('fs'), HTMLParser = require('node-html-parser');
+const { chromium } = require('playwright'), fs = require('fs'), HTMLParser = require('node-html-parser'), axios = require('axios');
 
 senderNames = [];
 senderEmails = [];
@@ -26,8 +26,10 @@ for(let i = 1; i < 8; i++) {
             senderEmails.push(emails[j].firstChild._rawText);
 }
 
-async function fillForm(context) {
-    const page = await context.newPage();
+async function fillForm(proxyServer) {
+    try {
+    const browser = await chromium.launch({headless: false, proxy: {server: proxyServer}});
+    const page = await browser.newPage();
     await page.goto('https://stanforduniversity.qualtrics.com/jfe/form/SV_cYfOYqREtprzaia');
     await page.getByText('Your Name').waitFor();
 
@@ -62,16 +64,16 @@ async function fillForm(context) {
     // await page.getByLabel("Next").click();
     await page.waitForTimeout(Math.random()*10000);
     await page.close();
+    await browser.close();
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 (async () => {
-    const browser = await chromium.launch({headless: false});
-    const context = await browser.newContext();
+    const proxyServers = (await axios.get('https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=100&country=all&ssl=all&anonymity=all')).data.split("\r\n");
     while(true) {
-        fillForm(context);
+        fillForm(proxyServers[Math.floor(Math.random()*proxyServers.length)]);
         await new Promise(r => setTimeout(r, 2000));
     }
-
-    await context.close();
-    await browser.close();
 })()
